@@ -1,14 +1,19 @@
 # labs-database
 ## Indexes
 
+1. [Percona 5.7 - replicate GTID]()
+2. [Mongodb replica set]()
 3. [Redis Master-Slave (with High Availability)]()
 
+## 1. Percona 5.7 - replicate GTID
 
-## Redis Master-Slave with High Availability (Sentinel)
+## 2. Mongodb replica set
+
+## 3. Redis Master-Slave with High Availability (Sentinel)
 > Note: I will CentOS like a main OS in this lab.
 
 ### Topology
-![Topology_RedisHA]('imgs/Topology_RedisHA.png')
+![Topology_RedisHA](imgs/Topology_RedisHA.png)
 
 192.168.57.10 (Master Node)
 192.168.57.11 (Slave Node)
@@ -108,35 +113,11 @@ sentinel failover-timeout mymaster 10000
 logfile "/var/log/redis/sentinel.log"
 ```
 
-- `sentinel monitor mymaster 192.168.57.10 6379 2`
+`sentinel monitor mymaster 192.168.57.10 6379 2` - This tells sentinel to monitor the `master node` and the last argument which is `2` is the quorum value.
 
-This tells sentinel to monitor the `master node` and the last argument which is `2` is the quorum value.
+`sentinel down-after-milliseconds mymaster 5000` - Server will unresponsive for **5 seconds** before being classified as `+down` and consequently activating a `+vote` to elect a new master node.
 
-- `sentinel down-after-milliseconds mymaster 5000`
-
-Server will unresponsive for **5 seconds** before being classified as `+down` and consequently activating a `+vote` to elect a new master node.
-
-- `sentinel failover-timeout mymaster 10000`
-
-Specifies the failover timeout in milliseconds.
-
-- Disable Transparent Huge Pages (THP) support
-```bash
-vim /etc/rc.local
-```
-
-```
-echo never > /sys/kernel/mm/transparent_hugepage/enabled
-```
-
-- Increase TCP backlog settings
-```bash
-vim /etc/sysctl.conf
-```
-
-```
-net.core.somaxconn=65535
-```
+`sentinel failover-timeout mymaster 10000` - Specifies the failover timeout in milliseconds.
 
 - Start redis and redis-sentinel services on 3 Redis nodes
 
@@ -232,4 +213,23 @@ repl_backlog_active:0
 repl_backlog_size:1048576
 repl_backlog_first_byte_offset:0
 repl_backlog_histlen:0
+```
+
+### Production performance optimizing tips and tricks
+- Disable Transparent Huge Pages (THP) support
+```bash
+vim /etc/rc.local
+```
+
+```
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+- Increase TCP backlog settings
+```bash
+vim /etc/sysctl.conf
+```
+
+```
+net.core.somaxconn=65535
 ```
