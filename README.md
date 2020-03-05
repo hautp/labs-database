@@ -15,10 +15,6 @@
 ### Topology
 ![Topology_RedisHA](imgs/Topology_RedisHA.png)
 
-192.168.57.10 (Master Node)
-192.168.57.11 (Slave Node)
-192.168.57.12 (Slave Node)
-
 ### Install Redis
 - Install Redis package via `yum` on 3 nodes
 
@@ -38,8 +34,8 @@ bind 192.168.57.10
 port 6379
 
 protected-mode no
-requirepass "Password1"
-masterauth "Password1"
+requirepass "MwsxWAMtymiBetNI"
+masterauth "MwsxWAMtymiBetNI"
 
 tcp-keepalive 300
 dir "/var/lib/redis"
@@ -57,8 +53,8 @@ bind 192.168.57.11
 port 6379
 
 protected-mode no
-requirepass "Password1"
-masterauth "Password1"
+requirepass "MwsxWAMtymiBetNI"
+masterauth "MwsxWAMtymiBetNI"
 
 slaveof 192.168.57.10 6379
 
