@@ -1,0 +1,6 @@
+---
+- name: Install Redis
+  include_tasks: installation.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Config Redis Master-Slave

@@ -1,0 +1,9 @@
+[redis-servers]
+redis-master-01 ansible_host=192.168.57.10
+redis-slave-01	ansible_host=192.168.57.11
+redis-slave-02	ansible_host=192.168.57.12
+
+[redis-servers:vars]
+asible_connection=ssh
+ansible_user=root
+ansible_ssh_port=22
