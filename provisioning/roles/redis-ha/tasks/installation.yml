@@ -1,6 +1,6 @@
 ---
 - name: Install Redis
   package:
-    name: 
+    name:
       - redis
     state: present

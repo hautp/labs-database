@@ -1,0 +1,5 @@
+---
+- name: Config Redis Sentinel to nodes
+  template:
+    src: redis-sentinel.conf.j2
+    dest: /etc/redis-sentinel.conf

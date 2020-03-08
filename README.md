@@ -3,7 +3,7 @@
 
 1. [Percona 5.7 - replicate GTID]()
 2. [Mongodb replica set]()
-3. [Redis Master-Slave (with High Availability)]()
+3. [Redis Master-Slave (with High Availability)](#3-redis-master-slave-with-high-availability-sentinel)
 
 ## 1. Percona 5.7 - replicate GTID
 

@@ -1,6 +1,10 @@
 ---
-- hosts: all
+- hosts: redis-servers
   become: true
   roles:
     - redis-ha
-
+  vars:
+    redis_port: 6379
+    sentinel_port: 26379
+    quorum: 2
+    redis_passwd: 'MwsxWAMtymiBetNI'

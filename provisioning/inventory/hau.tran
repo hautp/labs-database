@@ -1,7 +1,7 @@
 [redis-servers]
-redis-master-01 ansible_host=192.168.57.10
-redis-slave-01	ansible_host=192.168.57.11
-redis-slave-02	ansible_host=192.168.57.12
+redis-master-01 ansible_host=192.168.57.10 redis_role=master
+redis-slave-01	ansible_host=192.168.57.11 redis_role=slave
+redis-slave-02	ansible_host=192.168.57.12 redis_role=slave
 
 [redis-servers:vars]
 asible_connection=ssh
