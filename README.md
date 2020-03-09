@@ -8,9 +8,407 @@
 ## 1. Percona 5.7 - replicate GTID
 
 ## 2. Mongodb replica set
+> Note: I will use CentOS like a main OS in this lab.
+
+### Topology
+![Topology_MongoDB_ReplicaSet](imgs/Topology_MongoDB_ReplicaSet.png)
+
+### Install MongoDB
+#### On 3 MongoDB nodes
+- Add 3 `mongod` instances into `/etc/hosts`
+```bash
+vim /etc/hosts
+```
+
+```
+192.168.57.10   mongodb0.hautran.com
+192.168.57.11   mongodb1.hautran.com
+192.168.57.12   mongodb2.hautran.com
+```
+
+- Add MongoDB Community Edition repository
+
+```bash
+vim /etc/yum.repos.d/mongodb.repo
+```
+
+```
+[mongodb-org-4.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+```
+
+- Install MongoDB via `yum`
+
+```bash
+yum install mongodb-org -y
+```
+
+### Config MongoDB Replica Set
+#### On 3 MongoDB nodes
+- Change bindIP to `0.0.0.0` and set replica set name of MongoDB
+
+```bash
+vim /etc/mongod.conf
+``` 
+
+```
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+
+replication:
+  replSetName: "rs0"
+```
+
+- Start and set onboot MongoDB service
+
+```bash
+systemctl start mongod
+systemctl enable mongod
+```
+
+#### On Primary MongoDB node
+- Login in MongDB shell
+```bash
+mongo
+```
+
+Initiate the replica set
+
+```
+rs.initiate( {
+   _id : "rs0",
+   members: [
+      { _id: 0, host: "mongodb0.hautran.com:27017" },
+      { _id: 1, host: "mongodb1.hautran.com:27017" },
+      { _id: 2, host: "mongodb2.hautran.com:27017" }
+   ]
+})
+```
+
+```
+{
+  "ok" : 1,
+  "$clusterTime" : {
+    "clusterTime" : Timestamp(1583685813, 1),
+    "signature" : {
+      "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      "keyId" : NumberLong(0)
+    }
+  },
+  "operationTime" : Timestamp(1583685813, 1)
+}
+```
+
+### Verify MongoDB Status
+
+- View the replica set configuration
+
+```
+rs.conf()
+```
+
+The replica set configuration object resembles the following
+
+```
+{
+    "_id" : "rs0",
+    "version" : 1,
+    "protocolVersion" : NumberLong(1),
+    "writeConcernMajorityJournalDefault" : true,
+    "members" : [
+        {
+            "_id" : 0,
+            "host" : "mongodb0.hautran.com:27017",
+            "arbiterOnly" : false,
+            "buildIndexes" : true,
+            "hidden" : false,
+            "priority" : 1,
+            "tags" : {
+                
+            },
+            "slaveDelay" : NumberLong(0),
+            "votes" : 1
+        },
+        {
+            "_id" : 1,
+            "host" : "mongodb1.hautran.com:27017",
+            "arbiterOnly" : false,
+            "buildIndexes" : true,
+            "hidden" : false,
+            "priority" : 1,
+            "tags" : {
+                
+            },
+            "slaveDelay" : NumberLong(0),
+            "votes" : 1
+        },
+        {
+            "_id" : 2,
+            "host" : "mongodb2.hautran.com:27017",
+            "arbiterOnly" : false,
+            "buildIndexes" : true,
+            "hidden" : false,
+            "priority" : 1,
+            "tags" : {
+                
+            },
+            "slaveDelay" : NumberLong(0),
+            "votes" : 1
+        }
+    ],
+    "settings" : {
+        "chainingAllowed" : true,
+        "heartbeatIntervalMillis" : 2000,
+        "heartbeatTimeoutSecs" : 10,
+        "electionTimeoutMillis" : 10000,
+        "catchUpTimeoutMillis" : -1,
+        "catchUpTakeoverDelayMillis" : 30000,
+        "getLastErrorModes" : {
+            
+        },
+        "getLastErrorDefaults" : {
+            "w" : 1,
+            "wtimeout" : 0
+        },
+        "replicaSetId" : ObjectId("5e6520b5bc924e6438c05fd2")
+    }
+}
+```
+
+- Use `rs.status()` to identify the primary in the replica set.
+
+```
+> rs.status()
+```
+
+```
+{
+    "set" : "rs0",
+    "date" : ISODate("2020-03-09T07:20:29.667Z"),
+    "myState" : 1,
+    "term" : NumberLong(3),
+    "syncingTo" : "",
+    "syncSourceHost" : "",
+    "syncSourceId" : -1,
+    "heartbeatIntervalMillis" : NumberLong(2000),
+    "majorityVoteCount" : 2,
+    "writeMajorityCount" : 2,
+    "optimes" : {
+        "lastCommittedOpTime" : {
+            "ts" : Timestamp(1583738428, 1),
+            "t" : NumberLong(3)
+        },
+        "lastCommittedWallTime" : ISODate("2020-03-09T07:20:28.856Z"),
+        "readConcernMajorityOpTime" : {
+            "ts" : Timestamp(1583738428, 1),
+            "t" : NumberLong(3)
+        },
+        "readConcernMajorityWallTime" : ISODate("2020-03-09T07:20:28.856Z"),
+        "appliedOpTime" : {
+            "ts" : Timestamp(1583738428, 1),
+            "t" : NumberLong(3)
+        },
+        "durableOpTime" : {
+            "ts" : Timestamp(1583738428, 1),
+            "t" : NumberLong(3)
+        },
+        "lastAppliedWallTime" : ISODate("2020-03-09T07:20:28.856Z"),
+        "lastDurableWallTime" : ISODate("2020-03-09T07:20:28.856Z")
+    },
+    "lastStableRecoveryTimestamp" : Timestamp(1583738418, 1),
+    "lastStableCheckpointTimestamp" : Timestamp(1583738418, 1),
+    "electionCandidateMetrics" : {
+        "lastElectionReason" : "electionTimeout",
+        "lastElectionDate" : ISODate("2020-03-09T07:13:37.857Z"),
+        "electionTerm" : NumberLong(3),
+        "lastCommittedOpTimeAtElection" : {
+            "ts" : Timestamp(0, 0),
+            "t" : NumberLong(-1)
+        },
+        "lastSeenOpTimeAtElection" : {
+            "ts" : Timestamp(1583732177, 1),
+            "t" : NumberLong(2)
+        },
+        "numVotesNeeded" : 2,
+        "priorityAtElection" : 1,
+        "electionTimeoutMillis" : NumberLong(10000),
+        "numCatchUpOps" : NumberLong(0),
+        "newTermStartDate" : ISODate("2020-03-09T07:13:38.823Z"),
+        "wMajorityWriteAvailabilityDate" : ISODate("2020-03-09T07:13:39.570Z")
+    },
+    "members" : [
+        {
+            "_id" : 0,
+            "name" : "mongodb0.hautran.com:27017",
+            "health" : 1,
+            "state" : 1,
+            "stateStr" : "PRIMARY",
+            "uptime" : 428,
+            "optime" : {
+                "ts" : Timestamp(1583738428, 1),
+                "t" : NumberLong(3)
+            },
+            "optimeDate" : ISODate("2020-03-09T07:20:28Z"),
+            "syncingTo" : "",
+            "syncSourceHost" : "",
+            "syncSourceId" : -1,
+            "infoMessage" : "",
+            "electionTime" : Timestamp(1583738017, 1),
+            "electionDate" : ISODate("2020-03-09T07:13:37Z"),
+            "configVersion" : 1,
+            "self" : true,
+            "lastHeartbeatMessage" : ""
+        },
+        {
+            "_id" : 1,
+            "name" : "mongodb1.hautran.com:27017",
+            "health" : 1,
+            "state" : 2,
+            "stateStr" : "SECONDARY",
+            "uptime" : 421,
+            "optime" : {
+                "ts" : Timestamp(1583738428, 1),
+                "t" : NumberLong(3)
+            },
+            "optimeDurable" : {
+                "ts" : Timestamp(1583738428, 1),
+                "t" : NumberLong(3)
+            },
+            "optimeDate" : ISODate("2020-03-09T07:20:28Z"),
+            "optimeDurableDate" : ISODate("2020-03-09T07:20:28Z"),
+            "lastHeartbeat" : ISODate("2020-03-09T07:20:28.924Z"),
+            "lastHeartbeatRecv" : ISODate("2020-03-09T07:20:28.452Z"),
+            "pingMs" : NumberLong(0),
+            "lastHeartbeatMessage" : "",
+            "syncingTo" : "mongodb0.hautran.com:27017",
+            "syncSourceHost" : "mongodb0.hautran.com:27017",
+            "syncSourceId" : 0,
+            "infoMessage" : "",
+            "configVersion" : 1
+        },
+        {
+            "_id" : 2,
+            "name" : "mongodb2.hautran.com:27017",
+            "health" : 1,
+            "state" : 2,
+            "stateStr" : "SECONDARY",
+            "uptime" : 413,
+            "optime" : {
+                "ts" : Timestamp(1583738418, 1),
+                "t" : NumberLong(3)
+            },
+            "optimeDurable" : {
+                "ts" : Timestamp(1583738418, 1),
+                "t" : NumberLong(3)
+            },
+            "optimeDate" : ISODate("2020-03-09T07:20:18Z"),
+            "optimeDurableDate" : ISODate("2020-03-09T07:20:18Z"),
+            "lastHeartbeat" : ISODate("2020-03-09T07:20:28.830Z"),
+            "lastHeartbeatRecv" : ISODate("2020-03-09T07:20:28.858Z"),
+            "pingMs" : NumberLong(0),
+            "lastHeartbeatMessage" : "",
+            "syncingTo" : "mongodb0.hautran.com:27017",
+            "syncSourceHost" : "mongodb0.hautran.com:27017",
+            "syncSourceId" : 0,
+            "infoMessage" : "",
+            "configVersion" : 1
+        }
+    ],
+    "ok" : 1,
+    "$clusterTime" : {
+        "clusterTime" : Timestamp(1583738428, 1),
+        "signature" : {
+            "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+            "keyId" : NumberLong(0)
+        }
+    },
+    "operationTime" : Timestamp(1583738428, 1)
+}
+```
+
+### Enable Security Authentication (Optional)
+
+- Using `openssl` to create a keyfile on `Primary` node
+
+```bash
+openssl rand -base64 756 > /opt/mongo/mongo-keyfile
+chmod 400 /opt/mongo/mongo-keyfile
+chown mongod:root /opt/mongo/mongo-keyfile
+```
+
+- Copy keyfile to `Secondary` nodes
+
+```bash
+scp /opt/mongo/mongo-keyfile root@mongodb1.hautran.com:/opt/mongo/
+scp /opt/mongo/mongo-keyfile root@mongodb2.hautran.com:/opt/mongo/
+```
+
+- Edit MongoDB configuration to enable mode `authorization` and `keyfile` on 3 nodes
+```bash
+vim /etc/mongod.conf
+```
+
+```
+security:
+  authorization: enabled
+  keyFile: /opt/mongo/mongo-keyfile
+```
+
+- Create the user administrator with `userAdminAnyDatabase` role on `Primary` node
+
+```
+rs0:PRIMARY> admin = db.getSiblingDB("admin")
+
+rs0:PRIMARY> admin.createUser(
+  {
+    user: "admin",
+    pwd: "rlDBl5LnAGVPobQS",
+    roles: [{ 
+        role: "userAdminAnyDatabase", 
+        db: "admin" 
+    }]
+  }
+)
+```
+
+- Create a user with `clusterAdmin` role on `Primary` node
+
+That role could access the config and local databases, which are used in sharding and replication, respectively.
+
+```
+rs0:PRIMARY> admin = db.getSiblingDB('admin')
+
+rs0:PRIMARY> admin.createUser(
+  {
+    user: "clusteradmin", 
+    pwd: "RjWy73o71l9sOsoS", 
+    roles: ["clusterAdmin"]
+  }
+)
+```
+
+- Restart MongoDB service on 3 nodes
+```bash
+systemctl restart mongod
+```
+
+- Verify the `authorization` mode after enabled
+```bash
+mongo
+```
+
+```
+rs0:PRIMARY> db.getSiblingDB("admin").auth("clusteradmin", "RjWy73o71l9sOsoS")
+rs0:PRIMARY> rs.status()
+```
 
 ## 3. Redis Master-Slave with High Availability (Sentinel)
-> Note: I will CentOS like a main OS in this lab.
+> Note: I will use CentOS like a main OS in this lab.
 
 ### Topology
 ![Topology_RedisHA](imgs/Topology_RedisHA.png)
