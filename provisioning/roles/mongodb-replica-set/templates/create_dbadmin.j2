@@ -1,2 +1,1 @@
-admin = db.getSiblingDB("admin")
-admin.createUser({user: "{{ dbadmin_user }}", pwd: "{{ dbadmin_passwd }}", roles: [{role: "userAdminAnyDatabase", db: "admin" }]})
+db.createUser({user: "{{ dbadmin_user }}", pwd: "{{ dbadmin_passwd }}", roles: [{role: "userAdminAnyDatabase", db: "admin" }]})

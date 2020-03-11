@@ -1,0 +1,9 @@
+---
+replicaset_name: rs0
+mongod_port: 27017
+mongod_bindip: 0.0.0.0
+
+security:
+  mongod_keyfile: /opt/mongo/mongo-keyfile
+
+mongo_opt: /opt/mongo

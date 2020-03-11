@@ -44,21 +44,25 @@
 - name: Enable authorize mode on MongoDB
   lineinfile:
     path: /etc/mongod.conf
-    line: "  authorization: enable"
+    line: "  authorization: enabled"
     insertbefore: "keyFile"
     state: present
 
 - name: Copy script create DB Admin and Cluster Admin user
   template:
     src: "{{ item.src }}"
-    dest: "/opt/mongo/{{ item.dest }}"
+    dest: "{{ mongo_opt }}/{{ item.dest }}"
   with_items:
     - { src: create_dbadmin.j2, dest: create_dbadmin.js }
     - { src: create_clusteradmin.j2, dest: create_clusteradmin.js }
 
+- name: Waiting for MongoDB service
+  pause:
+    seconds: 10
+
 - name: Execute the script to create users
-  shell: mongo "/opt/mongo/{{ item }}"
+  shell: "{{ item }}"
   with_items:
-    - create_dbadmin.js
-    - create_clusteradmin.js
+    - "mongo admin {{ mongo_opt }}/create_dbadmin.js"
+    - "mongo admin -u {{ dbadmin_user }} -p {{ dbadmin_passwd }} {{ mongo_opt }}/create_clusteradmin.js"
   when: inventory_hostname in groups['mongodb-primary']
