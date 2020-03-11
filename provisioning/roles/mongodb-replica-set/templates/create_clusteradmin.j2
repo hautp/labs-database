@@ -1,0 +1,2 @@
+admin = db.getSiblingDB('admin')
+admin.createUser({user: "{{ clusteradmin_user }}", pwd: "{{ clusteradmin_passwd }}", roles: ["clusterAdmin"]})

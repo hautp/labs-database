@@ -1,0 +1,10 @@
+rs.initiate({
+  _id : "rs0",
+  members: [
+{% set count = namespace(value=0) %}
+{% for host in ansible_play_hosts %}
+  { _id: {{ count.value }}, host: "{{ host }}:{{ mongod_port }}" },
+{% set count.value = count.value + 1 %}
+{% endfor %}
+  ]
+})

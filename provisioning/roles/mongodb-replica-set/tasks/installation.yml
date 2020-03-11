@@ -1,0 +1,11 @@
+---
+- name: Add MongoDB Community Edition Repository
+  copy:
+    src: mongodb-org-4.2.repo
+    dest: /etc/yum.repos.d/mongodb-org-4.2.repo
+
+- name: Install MongoDB
+  package:
+    name: 
+      - mongodb-org
+    state: present

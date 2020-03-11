@@ -1,0 +1,6 @@
+---
+- name: Install MongoDB
+  include_tasks: installation.yml
+
+- name: Create replica set
+  include_tasks: create_replica_set.yml
