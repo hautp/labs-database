@@ -6,6 +6,260 @@
 3. [Redis Master-Slave (with High Availability)](#3-redis-master-slave-with-high-availability-sentinel)
 
 ## 1. Percona 5.7 - replicate GTID
+> Note: I will use CentOS like a main OS in this lab
+
+- **What is GTID**
+
+GTID (**Global Transaction Identifier**) is a unique identifier created and associated with each transaction committed on the server of origin. 
+
+It consists of two parts separated by a column:
+`GTID = source_id:transaction_id`
+
+Where:
+`source_id` : Server’s UUID
+`transaction_id` : Sequence number
+
+- **GTID Benefits**
+
+Easy to setup MySQL replication.
+Consistency is guaranteed between master and salves.
+Fail-over process become easy.
+Automatic fail over script is not a pain now.
+Simple to determine inconsistency.
+
+### Topology
+192.168.57.10 master
+192.168.57.11 slave01
+192.168.57.12 slave02
+
+### Install Percona MySQL from repository
+- **Step 1: Add Percona repository**
+
+```bash
+yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+```
+
+- **Step 2: List packages in Percona repository**
+
+```bash
+yum list | grep -i "Percona-Server-server"
+```
+
+```
+Percona-Server-server-56.x86_64             5.6.47-rel87.0.1.el7       @percona-release-x86_64
+Percona-Server-server-55.x86_64             5.5.62-rel38.14.el7        percona-release-x86_64
+Percona-Server-server-57.x86_64             5.7.29-32.1.el7            percona-release-x86_64
+```
+
+- **Step 3: Install Percona MySQL 5.6**
+
+```bash
+yum install Percona-Server-server-56.x86_64
+```
+
+### Configure MySQL master-slave replication with GTID 
+- **Step 1: If replication is already running, synchronize both servers by making them read-only.**
+
+```bash
+mysql> SET @@GLOBAL.read_only = ON;
+```
+
+- **Step 2: Stop mysqld service on `master` and `slave` servers**
+
+```bash
+systemctl stop mysqld
+```
+
+- **Step 3: Configure MySQL on `master` server**
+
+```bash
+vim /etc/my.cnf
+```
+
+```
+log-bin = mysql-bin
+server-id = 1
+relay-log = relay-log-slave
+gtid-mode =ON
+enforce-gtid-consistency
+binlog_format = MIXED
+log_slave_updates
+```
+
+Start mysqld service on `master` server
+
+```bash
+systemctl start mysqld
+```
+
+- **Step 4: Create replication user on `master` server**
+
+```bash
+mysql> grant replication slave on *.* to 'repl_usr'@'192.168.57.11' identified by 'GEwRjaTbB6RD6UR3';
+mysql> grant replication slave on *.* to 'repl_usr'@'192.168.57.12' identified by 'dCXNz7tSZQKLYgWL';
+```
+
+- **Step 5: Check mysql status on `master` server**
+```bash
+mysql> show master status \G
+```
+
+```
++------------------+----------+--------------+------------------+-------------------------------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set                         |
++------------------+----------+--------------+------------------+-------------------------------------------+
+| mysql-bin.000001 |     3174 |              |                  | b0b8aaec-647d-11ea-b779-5254008afee6:1-11 |
++------------------+----------+--------------+------------------+-------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+- **Step 6: Backup all databases on master server**
+
+Using `mysqldump` command to dump all databases
+
+```bash
+mysqldump --all-databases -flush-privileges \
+            --single-transaction --flush-logs \
+            --triggers --routines \
+            --events --hex-blob \
+            --host=localhost --port=3306 \
+            --user=root --password > /opt/all_databases.sql
+```
+
+Copy `all_databases.sql` to `slave01` and `slave02' servers
+
+```bash
+scp /opt/all_databases.sql slave01:/opt/
+scp /opt/all_databases.sql slave02:/opt/
+```
+
+- **Step 7: Configure MySQL on `slave01` and `slave02` servers**
+
+```bash
+vim /etc/my.cnf
+```
+
+With `slave01`
+
+```
+log_bin = mysql-bin
+server_id = 2
+binlog_format = ROW
+skip_slave_start
+gtid_mode = on
+enforce_gtid_consistency
+log_slave_updates
+```
+
+With `slave02`
+```
+log_bin = mysql-bin
+server_id = 3
+binlog_format = ROW
+skip_slave_start
+gtid_mode = on
+enforce_gtid_consistency
+log_slave_updates
+```
+
+
+Start mysqld service on both of slave servers
+
+```bash
+systemctl restart mysqld
+```
+
+Check slave status:
+
+```bash
+ mysql> show global variables like 'gtid_executed';
+```
+
+```
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| gtid_executed |       |
++---------------+-------+
+1 row in set (0.01 sec)
+```
+
+Import DB from file `all_databases.sql`
+
+```bash
+mysql> source /opt/all_databases.sql;
+```
+
+Check slave status again:
+
+```bash
+show global variables like 'gtid_executed';
+```
+
+```
+mysql> show global variables like 'gtid_executed';
++---------------+-------------------------------------------+
+| Variable_name | Value                                     |
++---------------+-------------------------------------------+
+| gtid_executed | b0b8aaec-647d-11ea-b779-5254008afee6:1-11 |
++---------------+-------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+- **Step 8: Execute the Change Master**
+
+With `slave01` server
+
+```bash
+mysql> CHANGE MASTER TO
+    -> MASTER_HOST='192.168.57.10',
+    -> MASTER_PORT=3306,
+    -> MASTER_USER='repl_usr',
+    -> MASTER_PASSWORD='GEwRjaTbB6RD6UR3',
+    -> MASTER_AUTO_POSITION=1;
+```
+
+and `slave02` server
+
+```bash
+mysql> CHANGE MASTER TO
+    -> MASTER_HOST='192.168.57.10',
+    -> MASTER_PORT=3306,
+    -> MASTER_USER='repl_usr',
+    -> MASTER_PASSWORD='dCXNz7tSZQKLYgWL',
+    -> MASTER_AUTO_POSITION=1;
+```
+
+Start the replication
+
+```bash
+mysql> start slave;
+```
+
+Check slave status
+
+```bash
+mysql> show slave status \G;
+```
+
+```
+Slave_IO_State: Waiting for master to send event
+Master_Host: 192.168.57.10
+Master_User: repl_usr
+Master_Port: 3306
+...
+Slave_IO_Running: Yes
+Slave_SQL_Running: Yes
+...
+Retrieved_Gtid_Set: b0b8aaec-647d-11ea-b779-5254008afee6:1-11
+Executed_Gtid_Set: b0b8aaec-647d-11ea-b779-5254008afee6:1-11
+```
+
+- **Step 9: Disable the read-only mode if you have enabled it earlier**
+
+```bash
+mysql> SET @@GLOBAL.read_only = OFF;
+```
 
 ## 2. Mongodb replica set
 > Note: I will use CentOS like a main OS in this lab.
