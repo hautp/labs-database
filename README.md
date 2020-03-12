@@ -17,6 +17,7 @@ It consists of two parts separated by a column:
 `GTID = source_id:transaction_id`
 
 Where:
+
 `source_id` : Server’s UUID
 
 `transaction_id` : Sequence number
