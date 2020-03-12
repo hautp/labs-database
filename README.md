@@ -13,10 +13,12 @@
 GTID (**Global Transaction Identifier**) is a unique identifier created and associated with each transaction committed on the server of origin. 
 
 It consists of two parts separated by a column:
+
 `GTID = source_id:transaction_id`
 
 Where:
 `source_id` : Server’s UUID
+
 `transaction_id` : Sequence number
 
 - **GTID Benefits**
@@ -29,7 +31,9 @@ Simple to determine inconsistency.
 
 ### Topology
 192.168.57.10 master
+
 192.168.57.11 slave01
+
 192.168.57.12 slave02
 
 ### Install Percona MySQL from repository
