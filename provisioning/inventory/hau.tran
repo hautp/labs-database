@@ -1,0 +1,40 @@
+# Redis
+[redis-servers]
+redis-master-01 ansible_host=192.168.57.10 redis_role=master
+redis-slave-01 ansible_host=192.168.57.11 redis_role=slave
+redis-slave-02 ansible_host=192.168.57.12 redis_role=slave
+
+[redis-servers:vars]
+asible_connection=ssh
+ansible_user=root
+ansible_ssh_port=22
+
+
+# MongoDB
+[mongodb-primary]
+mongodb0.hautran.com ansible_host=192.168.57.10
+
+[mongodb-secondary]
+mongodb1.hautran.com ansible_host=192.168.57.11
+mongodb2.hautran.com ansible_host=192.168.57.12
+
+[mongodb-servers:children]
+mongodb-primary
+mongodb-secondary
+
+[mongodb-servers:vars]
+asible_connection=ssh
+ansible_user=root
+ansible_ssh_port=22
+
+
+# Percona MySQL
+[percona-mysql]
+master1.hautran.com ansible_host=192.168.57.10
+slave1.hautran.com ansible_host=192.168.57.11
+slave2.hautran.com ansible_host=192.168.57.12
+
+[percona-mysql:vars]
+asible_connection=ssh
+ansible_user=root
+ansible_ssh_port=22

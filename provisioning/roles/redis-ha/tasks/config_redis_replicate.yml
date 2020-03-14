@@ -1,0 +1,11 @@
+- name: Copy config Redis to Master node
+  template:
+    src: master-redis.conf.j2
+    dest: /etc/redis.conf
+  when: hostvars[inventory_hostname].redis_role == "master"
+
+- name: Copy config Redis to Slave nodes
+  template:
+    src: slave-redis.conf.j2
+    dest: /etc/redis.conf
+  when: hostvars[inventory_hostname].redis_role == "slave"

@@ -1,0 +1,13 @@
+protected-mode no
+port {{ sentinel_port }}
+dir "/tmp"
+{% for host in ansible_play_hosts %}
+{% if hostvars[host].redis_role == "master" %}
+sentinel monitor mymaster {{ hostvars[host].ansible_host }} {{ redis_port }} {{ quorum }}
+{% endif %}
+{% endfor %}
+sentinel down-after-milliseconds mymaster 5000
+sentinel failover-timeout mymaster 10000
+sentinel auth-pass mymaster {{ redis_passwd }}
+logfile "/var/log/redis/sentinel.log"
+supervised systemd

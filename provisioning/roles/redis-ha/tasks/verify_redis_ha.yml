@@ -1,0 +1,16 @@
+---
+- name: Start redis services on all nodes
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - redis
+    - redis-sentinel
+
+- name: Verify Redis state on nodes
+  shell: netstat -lnput | egrep ":{{ redis_port }}|:{{ sentinel_port }}"
+  register: redis_state
+
+- debug:
+    msg: "{{ redis_state.stdout }}"

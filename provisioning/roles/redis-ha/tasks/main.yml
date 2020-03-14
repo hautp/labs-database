@@ -1,0 +1,16 @@
+---
+- name: Install Redis
+  include_tasks: installation.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Config Redis Master-Slave
+  include_tasks: config_redis_replicate.yml
+
+- name: Config Redis Sentinel
+  include_tasks: config_redis_sentinel.yml
+
+- name: Tuning for Redis HA
+  include_tasks: tuning_redis.yml
+
+- name: Verify Redis HA state
+  include_tasks: verify_redis_ha.yml

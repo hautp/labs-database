@@ -1,0 +1,5 @@
+---
+redis_port: 6379
+sentinel_port: 26379
+quorum: 2
+redis_passwd: ""

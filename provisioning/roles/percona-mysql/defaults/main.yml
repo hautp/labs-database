@@ -1,0 +1,4 @@
+---
+download_dir: "/usr/src"
+percona_repo: "https://repo.percona.com/yum/percona-release-latest.noarch.rpm"
+percona_mysql_pkg: "Percona-Server-server-56.x86_64"

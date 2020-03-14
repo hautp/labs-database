@@ -1,0 +1,18 @@
+---
+- hosts: mongodb-servers
+  become: true
+  roles:
+    - mongodb-replica-set
+  vars:
+    # ReplicaSet
+    replicaset_name: rs0
+    mongod_port: 27017
+    mongod_bindip: 0.0.0.0
+    # Security mode
+    security:
+      mongod_keyfile: /opt/mongo/mongo-keyfile
+    # MongoDB roles
+    dbadmin_user: 'admin'
+    dbadmin_passwd: 'rlDBl5LnAGVPobQS'
+    clusteradmin_user: 'clusteradmin'
+    clusteradmin_passwd: 'RjWy73o71l9sOsoS'
