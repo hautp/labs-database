@@ -1,7 +1,7 @@
 # labs-database
 ## Indexes
 
-1. [Percona 5.7 - replicate GTID](#1-percona-57---replicate-gtid)
+1. [Percona 5.6 - replicate GTID](#1-percona-56---replicate-gtid)
 2. [Mongodb replica set](#2-mongodb-replica-set)
 3. [Redis Master-Slave (with High Availability)](#3-redis-master-slave-with-high-availability-sentinel)
 
