@@ -5,7 +5,7 @@
 2. [Mongodb replica set](#2-mongodb-replica-set)
 3. [Redis Master-Slave (with High Availability)](#3-redis-master-slave-with-high-availability-sentinel)
 
-## 1. Percona 5.7 - replicate GTID
+## 1. Percona 5.6 - replicate GTID
 > Note: I will use CentOS like a main OS in this lab
 
 - **What is GTID**
