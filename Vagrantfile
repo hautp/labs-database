@@ -8,6 +8,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_check_update = false
   config.vbguest.auto_update = false
   config.vm.box = "centos/7"
+  ansible_inventory_dir = "provisioning/inventory"
 
   config.vm.provider :virtualbox do |vb|
     vb.customize [
@@ -33,6 +34,36 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "slave02" do |slave02|
     slave02.vm.hostname = "slave02.hautran.local"
     slave02.vm.network :private_network, ip: "192.168.57.12"
+  end
+
+  # Install software dependencies
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.playbook = "provisioning/linux-essentials.yml"
+  #  ansible.become = true
+  #end
+
+  # Install MongoDB replica set
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.playbook = "provisioning/mongodb-replica-set.yml"
+  #  ansible.inventory_path = "#{ansible_inventory_dir}"
+  #  ansible.limit = "all"
+  #  ansible.become = true
+  #end
+
+  # Install Redis cluster
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.playbook = "provisioning/redis-ha.yml"
+  #  ansible.inventory_path = "#{ansible_inventory_dir}"
+  #  ansible.limit = "all"
+  #  ansible.become = true
+  #end
+
+  # Install Percona MySQL
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provisioning/setup-percona-mysql-gtid.yml"
+    ansible.inventory_path = "#{ansible_inventory_dir}"
+    ansible.limit = "all"
+    ansible.become = true
   end
 
 end

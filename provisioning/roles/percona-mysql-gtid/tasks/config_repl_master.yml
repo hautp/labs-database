@@ -1,0 +1,18 @@
+---
+- name: Stop mysqld service
+  service:
+    name: mysqld
+    state: stopped
+
+- name: Update GTID config into master node
+  blockinfile:
+    path: /etc/my.cnf
+    insertafter: "socket=.*"
+    block: "{{ lookup('file', '../templates/mysql_master_gtid.conf') }}"
+    state: present
+
+- name: Start mysqld service
+  service:
+    name: mysqld
+    state: restarted
+    enabled: yes

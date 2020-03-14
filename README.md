@@ -1,7 +1,7 @@
 # labs-database
 ## Indexes
 
-1. [Percona 5.7 - replicate GTID]()
+1. [Percona 5.7 - replicate GTID](#1-percona-57---replicate-gtid)
 2. [Mongodb replica set](#2-mongodb-replica-set)
 3. [Redis Master-Slave (with High Availability)](#3-redis-master-slave-with-high-availability-sentinel)
 
@@ -31,11 +31,7 @@ Automatic fail over script is not a pain now.
 Simple to determine inconsistency.
 
 ### Topology
-192.168.57.10 master
-
-192.168.57.11 slave01
-
-192.168.57.12 slave02
+![Topology_Percona_GTID](imgs/Topology_Percona_GTID.png)
 
 ### Install Percona MySQL from repository
 - **Step 1: Add Percona repository**
@@ -85,7 +81,7 @@ vim /etc/my.cnf
 log-bin = mysql-bin
 server-id = 1
 relay-log = relay-log-slave
-gtid-mode =ON
+gtid-mode = ON
 enforce-gtid-consistency
 binlog_format = MIXED
 log_slave_updates

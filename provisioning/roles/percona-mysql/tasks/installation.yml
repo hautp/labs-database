@@ -1,0 +1,21 @@
+---
+- name: Download Percona Repository
+  get_url:
+    url: "{{ percona_repo }}"
+    dest: "{{ download_dir }}/percona-release-latest.rpm"
+
+- name: Install Percona Repository
+  yum:
+    name: "{{ download_dir }}/percona-release-latest.rpm"
+    state: present
+
+- name: Install Percona MySQL server
+  package:
+    name: "{{ percona_mysql_pkg }}"
+    state: present
+
+- name: Start and set Percona MySQl onboot
+  service:
+    name: mysqld
+    state: restarted
+    enabled: yes

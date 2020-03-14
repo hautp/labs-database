@@ -26,3 +26,15 @@ mongodb-secondary
 asible_connection=ssh
 ansible_user=root
 ansible_ssh_port=22
+
+
+# Percona MySQL
+[percona-mysql]
+master1.hautran.com ansible_host=192.168.57.10
+slave1.hautran.com ansible_host=192.168.57.11
+slave2.hautran.com ansible_host=192.168.57.12
+
+[percona-mysql:vars]
+asible_connection=ssh
+ansible_user=root
+ansible_ssh_port=22
