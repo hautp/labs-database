@@ -1,4 +1,4 @@
-# labs-database
+# Lab Databases
 ## Indexes
 
 1. [Percona 5.6 - replicate GTID](#1-percona-56---replicate-gtid)
